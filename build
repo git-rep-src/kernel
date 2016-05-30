@@ -1,0 +1,14 @@
+#!/bin/bash
+
+nasm -f elf64 src/multiboot_header.asm 
+nasm -f elf64 src/long_mode_init.asm
+nasm -f elf64 src/boot.asm
+gcc -c src/kernel.c -o src/kernel.o
+mv src/*.o src/o
+
+ld -n -o kernel.bin -T src/linker.ld src/o/multiboot_header.o src/o/long_mode_init.o src/o/boot.o src/o/kernel.o
+mv kernel.bin iso/boot
+
+grub-mkrescue -d /usr/lib/grub/i386-pc/ -o img.iso iso
+
+qemu-system-x86_64 -cdrom img.iso
